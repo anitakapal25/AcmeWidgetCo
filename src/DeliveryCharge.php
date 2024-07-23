@@ -1,13 +1,17 @@
 <?php
 
-class DeliveryCharge {
-    private $rules;
+namespace Acme;
 
-    public function __construct($rules) {
+use Acme\Interfaces\DeliveryChargeInterface;
+
+class DeliveryCharge implements DeliveryChargeInterface {
+    private array $rules;
+
+    public function __construct(array $rules) {
         $this->rules = $rules;
     }
 
-    public function getCharge($total) {
+    public function getCharge(float $total): float {
         if ($total < 50) {
             return $this->rules['under_50'];
         } elseif ($total < 90) {
@@ -16,4 +20,3 @@ class DeliveryCharge {
         return $this->rules['over_90'];
     }
 }
-?>

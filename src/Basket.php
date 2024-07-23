@@ -1,36 +1,37 @@
 <?php
 
-require_once 'Product.php';
-require_once 'Offer.php';
-require_once 'DeliveryCharge.php';
+namespace Acme;
+
+use Acme\Interfaces\OfferInterface;
+use Acme\Interfaces\DeliveryChargeInterface;
 
 class Basket {
-    private $products;
-    private $offers;
-    private $deliveryCharge;
-    private $items = [];
+    private array $products;
+    private array $offers;
+    private DeliveryChargeInterface $deliveryCharge;
+    private array $items = [];
 
-    public function __construct($products, $offers, $deliveryCharge) {
+    public function __construct(array $products, array $offers, DeliveryChargeInterface $deliveryCharge) {
         $this->products = $products;
         $this->offers = $offers;
         $this->deliveryCharge = $deliveryCharge;
     }
 
-    public function add($productCode) {
+    public function add(string $productCode) {
         if (isset($this->products[$productCode])) {
             $this->items[] = $productCode;
         } else {
-            throw new Exception("Invalid product code: $productCode");
+            throw new \Exception("Invalid product code: $productCode");
         }
     }
 
-    public function total() {
+    public function total(): float {
         $total = 0;
         $itemCounts = array_count_values($this->items);
 
-        // Calculate the cost of items considering offers
         foreach ($itemCounts as $productCode => $count) {
-            $price = $this->products[$productCode]->price;
+            $product = $this->products[$productCode];
+            $price = $product->getPrice();
             if (isset($this->offers[$productCode])) {
                 $total += $this->offers[$productCode]->apply($count, $price);
             } else {
@@ -38,10 +39,8 @@ class Basket {
             }
         }
 
-        // Add delivery charges
         $total += $this->deliveryCharge->getCharge($total);
 
-        return number_format($total, 2);
+        return number_format($total, 2, '.', '');
     }
 }
-?>
